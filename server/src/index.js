@@ -91,6 +91,18 @@ const sortByField = (items, field, direction = "desc") => {
   return sorted;
 };
 
+const isInvalidDateRange = (startDate, endDate) => {
+  if (!startDate || !endDate) {
+    return false;
+  }
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime())) {
+    return false;
+  }
+  return end < start;
+};
+
 const sanitizeTournament = (tournament) => {
   const { tournament_api_key, ...rest } = tournament;
   return rest;
@@ -315,6 +327,9 @@ app.get("/api/admin/tournaments", (req, res) => {
 app.post("/api/admin/tournaments", (req, res) => {
   const tournaments = getCollection("tournaments");
   const payload = req.body || {};
+  if (isInvalidDateRange(payload.start_date, payload.end_date)) {
+    return res.status(400).json({ error: "End date cannot be before start date." });
+  }
   const tournament = {
     tournament_id: payload.tournament_id || makeId("TE"),
     name: payload.name,
@@ -325,6 +340,7 @@ app.post("/api/admin/tournaments", (req, res) => {
     status: payload.status || "upcoming",
     registration_status: payload.registration_status || "closed",
     mode: payload.mode || "squad",
+    match_type: payload.match_type || "classic",
     perspective: payload.perspective || "TPP",
     prize_pool: Number(payload.prize_pool || 0),
     registration_charge: Number(payload.registration_charge || 0),
@@ -350,8 +366,23 @@ app.post("/api/admin/tournaments", (req, res) => {
 app.put("/api/admin/tournaments/:id", (req, res) => {
   const tournaments = getCollection("tournaments");
   const id = req.params.id;
+  const existing = tournaments.find((item) => item.tournament_id === id);
+  if (!existing) {
+    return res.status(404).json({ error: "Tournament not found" });
+  }
+  const payload = req.body || {};
+  const startDate =
+    Object.prototype.hasOwnProperty.call(payload, "start_date")
+      ? payload.start_date
+      : existing.start_date;
+  const endDate =
+    Object.prototype.hasOwnProperty.call(payload, "end_date")
+      ? payload.end_date
+      : existing.end_date;
+  if (isInvalidDateRange(startDate, endDate)) {
+    return res.status(400).json({ error: "End date cannot be before start date." });
+  }
   const updated = updateById(tournaments, "tournament_id", id, (current) => {
-    const payload = req.body || {};
     const next = { ...payload };
     if (Object.prototype.hasOwnProperty.call(payload, "custom_match_mode")) {
       next.custom_match_mode = ensureBoolean(payload.custom_match_mode) === true;

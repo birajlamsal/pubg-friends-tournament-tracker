@@ -33,6 +33,7 @@ const emptyTournament = {
   status: "upcoming",
   registration_status: "closed",
   mode: "squad",
+  match_type: "classic",
   perspective: "TPP",
   prize_pool: "",
   registration_charge: "",
@@ -40,9 +41,7 @@ const emptyTournament = {
   max_slots: "",
   region: "",
   rules: "",
-  contact_discord: "",
   api_key_required: false,
-  pubg_tournament_id: "",
   custom_match_mode: false,
   allow_non_custom: false,
   custom_player_names: "",
@@ -92,7 +91,9 @@ const emptyAnnouncement = {
   importance: "medium"
 };
 
-const regions = ["SEA", "EU", "NA", "SA", "OCE", "MEA", "ASIA", "KRJP", "CN", "Other"];
+const regions = Array.from(
+  new Set(["SEA", "EU", "NA", "SA", "OCE", "MEA", "ASIA", "KRJP", "CN", "Other"])
+);
 
 const formatPlayerNames = (value) => {
   if (!value) {
@@ -210,9 +211,23 @@ const AdminPage = () => {
   const onSubmitTournament = async (event) => {
     event.preventDefault();
     setError("");
+    if (tournamentForm.start_date && tournamentForm.end_date) {
+      const start = new Date(tournamentForm.start_date);
+      const end = new Date(tournamentForm.end_date);
+      if (
+        Number.isFinite(start.getTime()) &&
+        Number.isFinite(end.getTime()) &&
+        end < start
+      ) {
+        setError("End date cannot be before start date.");
+        return;
+      }
+    }
     try {
+      const { tournament_id, contact_discord, pubg_tournament_id, ...rest } =
+        tournamentForm;
       const payload = {
-        ...tournamentForm,
+        ...rest,
         prize_pool: Number(tournamentForm.prize_pool || 0),
         registration_charge: Number(tournamentForm.registration_charge || 0),
         max_slots: tournamentForm.max_slots ? Number(tournamentForm.max_slots) : null,
@@ -652,20 +667,6 @@ const AdminPage = () => {
               <form onSubmit={onSubmitTournament}>
                 <div className="form-grid">
                   <label>
-                    Tournament ID (immutable)
-                    <input
-                      value={tournamentForm.tournament_id}
-                      onChange={(event) =>
-                        setTournamentForm((prev) => ({
-                          ...prev,
-                          tournament_id: event.target.value
-                        }))
-                      }
-                      placeholder="Auto-generated"
-                      disabled
-                    />
-                  </label>
-                  <label>
                     Name
                     <input
                       value={tournamentForm.name}
@@ -717,6 +718,21 @@ const AdminPage = () => {
                     </select>
                   </label>
                   <label>
+                    Match Type
+                    <select
+                      value={tournamentForm.match_type || "classic"}
+                      onChange={(event) =>
+                        setTournamentForm((prev) => ({
+                          ...prev,
+                          match_type: event.target.value
+                        }))
+                      }
+                    >
+                      <option value="classic">Classic</option>
+                      <option value="team_deathmatch">Team Deathmatch</option>
+                    </select>
+                  </label>
+                  <label>
                     FP / TPP
                     <select
                       value={tournamentForm.perspective || "TPP"}
@@ -749,6 +765,7 @@ const AdminPage = () => {
                     <input
                       type="date"
                       value={tournamentForm.end_date}
+                      min={tournamentForm.start_date || undefined}
                       onChange={(event) =>
                         setTournamentForm((prev) => ({ ...prev, end_date: event.target.value }))
                       }
@@ -839,18 +856,6 @@ const AdminPage = () => {
                     />
                   </label>
                   <label>
-                    Contact Discord
-                    <input
-                      value={tournamentForm.contact_discord}
-                      onChange={(event) =>
-                        setTournamentForm((prev) => ({
-                          ...prev,
-                          contact_discord: event.target.value
-                        }))
-                      }
-                    />
-                  </label>
-                  <label>
                     API Key Required
                     <select
                       value={tournamentForm.api_key_required ? "true" : "false"}
@@ -881,59 +886,31 @@ const AdminPage = () => {
                     </select>
                   </label>
                   <label>
-                    Include Non-Custom (Testing)
-                    <select
-                      value={tournamentForm.allow_non_custom ? "true" : "false"}
+                    Custom Match Player Names
+                    <input
+                      value={tournamentForm.custom_player_names}
                       onChange={(event) =>
                         setTournamentForm((prev) => ({
                           ...prev,
-                          allow_non_custom: event.target.value === "true"
+                          custom_player_names: event.target.value
                         }))
                       }
-                    >
-                      <option value="false">False</option>
-                      <option value="true">True</option>
-                    </select>
+                      placeholder="player1, player2, player3"
+                    />
                   </label>
-                <label>
-                  PUBG Tournament ID
-                  <input
-                    value={tournamentForm.pubg_tournament_id}
-                    onChange={(event) =>
-                      setTournamentForm((prev) => ({
-                        ...prev,
-                        pubg_tournament_id: event.target.value
-                      }))
-                    }
-                    placeholder="official tournament id"
-                  />
-                </label>
-                <label>
-                  Custom Match Player Names
-                  <input
-                    value={tournamentForm.custom_player_names}
-                    onChange={(event) =>
-                      setTournamentForm((prev) => ({
-                        ...prev,
-                        custom_player_names: event.target.value
-                      }))
-                    }
-                    placeholder="player1, player2, player3"
-                  />
-                </label>
-                <label>
-                  Custom Match IDs
-                  <input
-                    value={tournamentForm.custom_match_ids}
-                    onChange={(event) =>
-                      setTournamentForm((prev) => ({
-                        ...prev,
-                        custom_match_ids: event.target.value
-                      }))
-                    }
-                    placeholder="match-uuid-1, match-uuid-2"
-                  />
-                </label>
+                  <label>
+                    Custom Match IDs
+                    <input
+                      value={tournamentForm.custom_match_ids}
+                      onChange={(event) =>
+                        setTournamentForm((prev) => ({
+                          ...prev,
+                          custom_match_ids: event.target.value
+                        }))
+                      }
+                      placeholder="match-uuid-1, match-uuid-2"
+                    />
+                  </label>
                 </div>
                 <label>
                   Description
@@ -1036,6 +1013,10 @@ const AdminPage = () => {
                     <strong>{selectedTournament.mode}</strong>
                   </div>
                   <div>
+                    <span className="muted">Match Type</span>
+                    <strong>{selectedTournament.match_type || "classic"}</strong>
+                  </div>
+                  <div>
                     <span className="muted">FP / TPP</span>
                     <strong>{selectedTournament.perspective || "TPP"}</strong>
                   </div>
@@ -1063,21 +1044,10 @@ const AdminPage = () => {
                     <span className="muted">Region</span>
                     <strong>{selectedTournament.region || "-"}</strong>
                   </div>
-                  <div>
-                    <span className="muted">PUBG Tournament ID</span>
-                    <strong>{selectedTournament.pubg_tournament_id || "-"}</strong>
-                  </div>
                 </div>
                 {selectedTournament.banner_url && (
                   <div className="banner-preview">
                     <img src={selectedTournament.banner_url} alt={selectedTournament.name} />
-                  </div>
-                )}
-                {selectedTournament.api_key_required &&
-                  !selectedTournament.custom_match_mode &&
-                  !selectedTournament.pubg_tournament_id && (
-                  <div className="alert">
-                    PUBG API not configured. Add the PUBG tournament ID to enable live stats.
                   </div>
                 )}
                 {selectedTournament.api_key_required &&
