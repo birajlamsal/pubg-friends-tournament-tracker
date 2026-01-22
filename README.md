@@ -1,61 +1,74 @@
-# PUBG PC Tournament Platform
+📊 PUBG Tournament Dashboard
+🔥 Overview
 
-Production-oriented full-stack scaffold for PUBG PC tournaments, stats, and management.
+PUBG Tournament Dashboard is a powerful, user-friendly platform for organizing, tracking, and visualizing PUBG tournament data for your teams and friends. Whether you're running casual competitions or community events, this project gives you a streamlined toolset to manage participants, match results, standings, and more — all in one place.
 
-## Features
-- Dark esports UI with GSAP hero and scroll reveals.
-- Featured tournaments, matches, team/player stats, winners podiums.
-- Tournament listing with search, filters, and sorting.
-- Tournament detail view with participants and published results.
-- Admin API with simple auth for managing tournaments, players, teams, matches, participants, winners, and announcements.
-- Modular and API-ready for PUBG integration.
+🚀 Features
 
-## Project Structure
-- `server/` Express API with JSON persistence in `server/data`.
-- `client/` React + Vite frontend.
+✨ Real-Time Leaderboards – Automatically sort and display competitive rankings.
+📅 Tournament Scheduling – Create and manage multiple match events with ease.
+👥 Player & Team Profiles – Track individual and team stats across tournaments.
+📊 Match Result Analytics – Gain insights from wins, kills, and performance trends.
+🎮 Frontend + Backend Stack – Full full-stack solution for plug-and-play use.
 
-## Getting Started
+🧠 Why Use This Dashboard?
 
-### 1) Install dependencies
-```bash
+This project is perfect if you want to:
+
+Quickly set up tournament tracking for PUBG events.
+
+Keep an online record of competitive results.
+
+Share live leaderboards with your community or team.
+
+Customize your event format and scoring system.
+
+🛠 Project Structure
+├── client/             # Frontend app (UI)
+├── server/             # API + backend logic
+├── data/               # Sample data or match info
+├── README.md           # Project documentation
+├── LICENSE             # Open source license
+├── package.json        # Dependencies & scripts
+
+🧩 Getting Started
+🏁 1. Install
 npm install
 npm --prefix server install
-npm --prefix client install
-```
 
-### 2) Configure environment
-```bash
+⚙️ 2. Configure
+
+Copy and customize the server environment file:
+
 cp server/.env.example server/.env
-```
-Default admin login is `admin / admin`. Update `server/.env` as needed.
 
-### 3) Run in development
-```bash
+
+Update values like database path or API config in the .env file.
+
+🏃‍♂️ 3. Run Locally
+
+Start development server:
+
 npm run dev
-```
-- API: `http://localhost:5000`
-- Client: `http://localhost:5173`
 
-## Admin Auth
-- POST `/api/admin/login` with `{ "username": "admin", "password": "admin" }`.
-- Use the returned token as `Authorization: Bearer <token>` for admin routes.
-## Admin UI
-- Visit `http://localhost:5173/admin` for a basic admin panel.
 
-## Data Management
-- Source data is in `server/data/*.json`.
-- IDs are immutable; updates ignore changes to the ID fields.
-- Leaderboard sorting is client-side only and does not mutate stored values.
+Your local server will start (typically on http://localhost:5000) and the frontend will run at another port (usually http://localhost:5173).
 
-## Google Forms (External)
-- Player form fields: Player Name, PUBG IGN, Discord ID, Email (optional), Region (optional), Profile pic link (optional)
-- Team form fields: Team Name, Captain Player ID, Player IDs, Discord Contact, Team logo link (optional), Region (optional)
+📇 Contributions Welcome
 
-## Optional PUBG API
-- Per-tournament API key fields are supported in tournament records.
-- No API calls are made by default.
+Contributions are highly appreciated! Whether it's bug fixes, feature ideas, or UI improvements — your help makes this project better.
 
-## Scripts
-- `npm run dev` - run server and client concurrently.
-- `npm run build` - build client (server has no build step).
-- `npm run start` - run server.
+Fork the repository
+
+Create a feature branch
+
+Submit a pull request
+
+📜 License
+
+This project is open-source under the MIT License.
+See the LICENSE file for more details.
+
+🧠 Want to Learn More?
+
+If this project helped you build something awesome or you want to see future improvements, feel free to ⭐ the repo!
